@@ -1,0 +1,26 @@
+{
+  "name": "Frognode",
+  "version": "0.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "express": "~3.3.4",
+    "cryptico": "~1.0.2",
+    "sqlite3": "~2.1.14",
+    "xmlrpc": "~1.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FrogMessenger/Frognode.git"
+  },
+  "author": "",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/FrogMessenger/Frognode/issues"
+  }
+}
