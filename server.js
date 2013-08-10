@@ -25,7 +25,6 @@ var db = new sqlite.Database('node.sqlite');
 db.serialize(function() {
 	db.run('create table if not exists Users (pubkey TEXT)');
 	db.run('create table if not exists Addresses (address TEXT, label TEXT, userid INTEGER)');
-	db.run('create table if not exists usedTokens (used TEXT)');
 });
 var node_secret = '123';
 var nodeRSA = cryptico.generateRSAKey(node_secret, 1024);
@@ -82,19 +81,27 @@ function decryptIncoming(data) {
 	}
 }
 function encryptOutgoing(data, key) {
-
+	var jsonString = JSON.stringify(data);
+	var encrypted = cryptico.encrypt(jsonString, key, nodeRSA);
+	var json = {data: encrypted.cipher};
+	return JSON.stringify(json);
 }
 
 //main program
+//note: send decrypted data when the message is a crypto error. encrypt all other times.
 var main = function() {
 	if (started) {
 		app.use(express.bodyParser());
 		app.post('/newaddress', function(req, res) {
 			res.header("Access-Control-Allow-Origin", "*");
-			label = new Buffer('User address').toString('base64');
-			rpcClient.methodCall('createRandomAddress', [label], function(err, val) {
-				console.log(val);
-			});
+			var data = req.body.data;
+			var decryptedData = decryptIncoming(data);
+
+			if (decryptedData == 'Failed to decrypt request.' || decryptedData == 'Signature invalid.') {
+				result.error = "Invalid message.";
+				res.send(JSON.stringify(result));
+			}
+
 		});
 		app.post('/newuser', function(req, res) {
 			res.header("Access-Control-Allow-Origin", "*"); //ok, sure whatever
@@ -102,7 +109,8 @@ var main = function() {
 			function doesNotExist(key) {
 				function successSql() {
 					result.message = 'Successfully inserted pubkey.';
-					res.send(JSON.stringify(result));
+					toSend = encryptOutgoing(result, decryptedData.pubkey);
+					res.send(toSend);
 				}
 				stmt = db.prepare('insert into Users (pubkey) values (?)');
 				stmt.run(key, function(err){
@@ -110,11 +118,12 @@ var main = function() {
 				});
 			}
 			var data = req.body.data;
-			decryptedData = decryptIncoming(data);
+			var decryptedData = decryptIncoming(data);
 			if (decryptedData == 'Failed to decrypt request.' || decryptedData == 'Signature invalid.') {
 				result.error = "Invalid message.";
 				res.send(JSON.stringify(result));
 			}
+			decryptedData = JSON.parse(decryptedData.plaintext);
 			pubkey = decryptedData.pubkey;
 
 			if (isValidPubkey(pubkey)) {
@@ -127,7 +136,8 @@ var main = function() {
 						doesNotExist(pubkey);
 					} else {
 						result.message = 'That key is already in use.';
-						res.send(JSON.stringify(result));
+						toSend = encryptOutgoing(result, decryptedData.pubkey);
+						res.send(toSend);
 					}
 				});
 			} else {
