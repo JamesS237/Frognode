@@ -19,7 +19,7 @@
     "url": "https://github.com/FrogMessenger/Frognode.git"
   },
   "author": "Jaxkr",
-  "license": "BSD",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/FrogMessenger/Frognode/issues"
   }
