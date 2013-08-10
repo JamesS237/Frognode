@@ -1,7 +1,7 @@
 {
   "name": "Frognode",
   "version": "0.0.0",
-  "description": "",
+  "description": "The personal server for the Frog Bitmessage client.",
   "main": "server.js",
   "dependencies": {
     "express": "~3.3.4",
@@ -18,7 +18,7 @@
     "type": "git",
     "url": "https://github.com/FrogMessenger/Frognode.git"
   },
-  "author": "",
+  "author": "Jaxkr",
   "license": "BSD",
   "bugs": {
     "url": "https://github.com/FrogMessenger/Frognode/issues"
