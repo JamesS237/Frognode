@@ -4,3 +4,4 @@ keys(copy).dat
 messages.dat
 messages.dat-journal
 node.sqlite
+debug.log
