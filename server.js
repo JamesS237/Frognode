@@ -96,6 +96,7 @@ var main = function() {
 			res.header("Access-Control-Allow-Origin", "*");
 			var data = req.body.data;
 			var decryptedData = decryptIncoming(data);
+			var decryptedData = JSON.parse(decryptedData.plaintext);
 
 			if (decryptedData == 'Failed to decrypt request.' || decryptedData == 'Signature invalid.') {
 				result.error = "Invalid message.";
@@ -108,9 +109,15 @@ var main = function() {
 			var result = {};
 			function doesNotExist(key) {
 				function successSql() {
-					result.message = 'Successfully inserted pubkey.';
-					toSend = encryptOutgoing(result, decryptedData.pubkey);
-					res.send(toSend);
+					function returnKeyWithId(id) {
+						result.kid = id['last_insert_rowid()'];
+						result.message = 'Successfully inserted pubkey.';
+						toSend = encryptOutgoing(result, decryptedData.pubkey);
+						res.send(toSend);
+					}
+					db.get('select last_insert_rowid()', function(err, row) {
+						returnKeyWithId(row)
+					});
 				}
 				stmt = db.prepare('insert into Users (pubkey) values (?)');
 				stmt.run(key, function(err){
@@ -123,19 +130,20 @@ var main = function() {
 				result.error = "Invalid message.";
 				res.send(JSON.stringify(result));
 			}
-			decryptedData = JSON.parse(decryptedData.plaintext);
-			pubkey = decryptedData.pubkey;
+			var decryptedData = JSON.parse(decryptedData.plaintext);
+			var pubkey = decryptedData.pubkey;
 
 			if (isValidPubkey(pubkey)) {
-				stmt = db.prepare('select count(*) from Users where pubkey=(?)');
+				stmt = db.prepare('select rowid from Users where pubkey=(?)');
 				stmt.get(pubkey, function(err, row) {
 					if (err) {
 						console.log(err);
 					}
-					if (row['count(*)'] == 0) {
+					if (row == undefined) {
 						doesNotExist(pubkey);
 					} else {
 						result.message = 'That key is already in use.';
+						result.kid = row['rowid'];
 						toSend = encryptOutgoing(result, decryptedData.pubkey);
 						res.send(toSend);
 					}
