@@ -1,16 +1,16 @@
-var sqlite = require('sqlite3');
-var cryptico = require('cryptico');
-var xmlrpc = require('xmlrpc');
-var express = require('express');
+var sqlite = require('sqlite3'),
+    cryptico = require('cryptico'),
+    xmlrpc = require('xmlrpc'),
+    express = require('express');
 
 var app = express();
 var spawn = require('child_process').spawn,
-    bitmessage    = spawn('python', ['src/bitmessagemain.py']);
+    bitmessage = spawn('python', ['src/bitmessagemain.py']);
 
-debugBitmessage = false;
+var debugBitmessage = false;
 if (debugBitmessage) {
 	bitmessage.stderr.on('data', function (data) {
-  	  console.log('stderr: ' + data);
+        console.log('stderr: ' + data);
 	});
 	bitmessage.stdout.on('data', function(data) {
 		console.log('stdout: ' + data);
@@ -45,39 +45,39 @@ var rpcClient = xmlrpc.createClient({
 var started;
 var add = function() {
 	rpcClient.methodCall('add', [1,2], function(err, val) {
-	  if (val == 3) {
-	  	started = true;
-	  }
-	  if (started) {
-	  	console.log('Bitmessage daemon successfully started.');
-	  }
+        if (val == 3) {
+            started = true;
+        }
+        if (started) {
+            console.log('Bitmessage daemon successfully started.');
+        }
 	});
-}
+};
 
 //give pybitmessage time to start up
 setTimeout(add, 1000);
 
 //utility functions
 function isValidPubkey(pubkey) {
-	if (pubkey == undefined) {
+	if (pubkey === undefined) {
 		return false;
 	}
 	if (pubkey.length < 5) {
 		return false;
 	}
-	regexPattern = /^[a-zA-Z0-9\=\+\/]+$/;
+	var regexPattern = /^[a-zA-Z0-9\=\+\/]+$/;
 	return regexPattern.test(pubkey);
 }
 function decryptIncoming(data) {
 	try	{
 		var cleartext = cryptico.decrypt(data, nodeRSA);
+        if (cleartext.signature == 'verified') {
+            return {plaintext: cleartext.plaintext, pubkey: cleartext.publicKeyString};
+        } else {
+            return 'Signature invalid.';
+        }
 	} catch (e) {
 		return 'Failed to decrypt request.';
-	}
-	if (cleartext.signature == 'verified') {
-		return {plaintext: cleartext.plaintext, pubkey: cleartext.publicKeyString};
-	} else {
-		return 'Signature invalid.';
 	}
 }
 function decryptRequest(data, res) {
@@ -107,9 +107,7 @@ var main = function() {
 		app.post('/newaddress', function(req, res) {
 			setGlobalHeaders(res);
 			var data = req.body.data;
-			var decryptedData = decryptRequest(data, res);
-			var decryptedData = decryptedData.data;
-
+			var decryptedData = decryptRequest(data, res).data;
 		});
 		app.post('/getaddresses', function(req, res) {
 
@@ -124,7 +122,7 @@ var main = function() {
 				function rpcDone(data) {
 					var decodedMessages = [];
 					for (var i = 0; i < data.inboxMessages.length; i++) {
-						decodedMessage = data.inboxMessages[i];
+						var decodedMessage = data.inboxMessages[i];
 						decodedMessage.subject = new Buffer(data.inboxMessages[i].subject, 'base64').toString('ascii');
 						decodedMessage.message = new Buffer(data.inboxMessages[i].message, 'base64').toString('ascii');
 						decodedMessages.push(decodedMessage);
@@ -134,13 +132,13 @@ var main = function() {
 					res.send(toSend);
 				}
 				for (var i = 0; i < addresses.length; i++) {
-						rpcClient.methodCall('getInboxMessagesByAddress', [addresses[i].address], function(err, val) {
+                    rpcClient.methodCall('getInboxMessagesByAddress', [addresses[i].address], function(err, val) {
 						rpcDone(JSON.parse(val));
 					});
 				}
 			}
 			var keyID = dData.kid;
-			stmt = db.prepare('select * from Addresses where userid=(?)');
+			var stmt = db.prepare('select * from Addresses where userid=(?)');
 			stmt.all(keyID, function(err, rows) {
 				sqlDone(rows);
 			});
@@ -150,26 +148,25 @@ var main = function() {
 			function doesNotExist(key) {
 				function successSql() {
 					function returnKeyWithId(id) {
-						result = {kid: id['last_insert_rowid()'], message: 'Successfully inserted pubkey.'}
-						toSend = encryptOutgoing(result, decryptedData.pubkey);
+						var result = {kid: id['last_insert_rowid()'], message: 'Successfully inserted pubkey.'};
+						var toSend = encryptOutgoing(result, decryptedData.pubkey);
 						res.send(toSend);
 					}
 					db.get('select last_insert_rowid()', function(err, row) {
 						returnKeyWithId(row)
 					});
 				}
-				stmt = db.prepare('insert into Users (pubkey) values (?)');
+				var stmt = db.prepare('insert into Users (pubkey) values (?)');
 				stmt.run(key, function(err){
 					successSql();
 				});
 			}
 			var data = req.body.data;
-			var decryptedData = decryptRequest(data, res);
-			var decryptedData = decryptedData.data;
+			var decryptedData = decryptRequest(data, res).data;
 			var pubkey = decryptedData.pubkey;
 
 			if (isValidPubkey(pubkey)) {
-				stmt = db.prepare('select rowid from Users where pubkey=(?)');
+				var stmt = db.prepare('select rowid from Users where pubkey=(?)');
 				stmt.get(pubkey, function(err, row) {
 					if (err) {
 						console.log(err);
@@ -177,13 +174,13 @@ var main = function() {
 					if (row == undefined) {
 						doesNotExist(pubkey);
 					} else {
-						result = {message: 'That key is already in use.', kid: row['rowid']}
-						toSend = encryptOutgoing(result, decryptedData.pubkey);
+						var result = {message: 'That key is already in use.', kid: row['rowid']}
+						var toSend = encryptOutgoing(result, decryptedData.pubkey);
 						res.send(toSend);
 					}
 				});
 			} else {
-				result = {error: 'That key is invalid.'}
+				var result = {error: 'That key is invalid.'}
 				res.send(JSON.stringify(result));
 			}
 		});
@@ -194,13 +191,13 @@ var main = function() {
 		console.log('Bitmessage daemon not responding. Killing server.');
 		process.exit();
 	}
-}
+};
 // .1 seconds after giving pybitmessage time, start up web server.
 setTimeout(main, 1100);
 
 process.on('SIGINT', function() {
-  console.log("\ngracefully shutting down from  SIGINT (Crtl-C)");
-  console.log('Killing Bitmessage daemon');
-  bitmessage.kill();
-  process.exit();
+    console.log("\ngracefully shutting down from  SIGINT (Crtl-C)");
+    console.log('Killing Bitmessage daemon');
+    bitmessage.kill();
+    process.exit();
 });
