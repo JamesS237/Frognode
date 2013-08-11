@@ -80,38 +80,77 @@ function decryptIncoming(data) {
 		return 'Signature invalid.';
 	}
 }
+function decryptRequest(data, res) {
+	var decryptedData = decryptIncoming(data);
+	if (decryptedData == 'Failed to decrypt request.' || decryptedData == 'Signature invalid.') {
+		result = {error: 'Invalid message.'};
+		res.send(JSON.stringify(result));
+	} else {
+		var decryptedData = {data: JSON.parse(decryptedData.plaintext), pubkey: decryptedData.pubkey};
+		return decryptedData;
+	}
+}
 function encryptOutgoing(data, key) {
 	var jsonString = JSON.stringify(data);
 	var encrypted = cryptico.encrypt(jsonString, key, nodeRSA);
 	var json = {data: encrypted.cipher};
 	return JSON.stringify(json);
 }
-
+function setGlobalHeaders(res) {
+	res.header("Access-Control-Allow-Origin", "*"); //ok, sure whatever
+}
 //main program
 //note: send decrypted data when the message is a crypto error. encrypt all other times.
 var main = function() {
 	if (started) {
 		app.use(express.bodyParser());
 		app.post('/newaddress', function(req, res) {
-			res.header("Access-Control-Allow-Origin", "*");
+			setGlobalHeaders(res);
 			var data = req.body.data;
-			var decryptedData = decryptIncoming(data);
-			var decryptedData = JSON.parse(decryptedData.plaintext);
-
-			if (decryptedData == 'Failed to decrypt request.' || decryptedData == 'Signature invalid.') {
-				result.error = "Invalid message.";
-				res.send(JSON.stringify(result));
-			}
+			var decryptedData = decryptRequest(data, res);
+			var decryptedData = decryptedData.data;
 
 		});
+		app.post('/getaddresses', function(req, res) {
+
+		});
+		app.post('/getinbox', function(req, res) {
+			setGlobalHeaders(res);
+			var data = req.body.data;
+			var decryptedData = decryptRequest(data, res);
+			var dData = decryptedData.data;
+
+			function sqlDone(addresses) {
+				function rpcDone(data) {
+					var decodedMessages = [];
+					for (var i = 0; i < data.inboxMessages.length; i++) {
+						decodedMessage = data.inboxMessages[i];
+						decodedMessage.subject = new Buffer(data.inboxMessages[i].subject, 'base64').toString('ascii');
+						decodedMessage.message = new Buffer(data.inboxMessages[i].message, 'base64').toString('ascii');
+						decodedMessages.push(decodedMessage);
+					}
+					var result = {messages: decodedMessages};
+					var toSend = encryptOutgoing(result, decryptedData.pubkey);
+					res.send(toSend);
+				}
+				for (var i = 0; i < addresses.length; i++) {
+						rpcClient.methodCall('getInboxMessagesByAddress', [addresses[i].address], function(err, val) {
+						rpcDone(JSON.parse(val));
+					});
+				}
+			}
+			var keyID = dData.kid;
+			stmt = db.prepare('select * from Addresses where userid=(?)');
+			stmt.all(keyID, function(err, rows) {
+				sqlDone(rows);
+			});
+		});
 		app.post('/newuser', function(req, res) {
-			res.header("Access-Control-Allow-Origin", "*"); //ok, sure whatever
-			var result = {};
+			setGlobalHeaders(res);
 			function doesNotExist(key) {
 				function successSql() {
 					function returnKeyWithId(id) {
-						result.kid = id['last_insert_rowid()'];
-						result.message = 'Successfully inserted pubkey.';
+						result = {kid: id['last_insert_rowid()'], message: 'Successfully inserted pubkey.'}
 						toSend = encryptOutgoing(result, decryptedData.pubkey);
 						res.send(toSend);
 					}
@@ -125,12 +164,8 @@ var main = function() {
 				});
 			}
 			var data = req.body.data;
-			var decryptedData = decryptIncoming(data);
-			if (decryptedData == 'Failed to decrypt request.' || decryptedData == 'Signature invalid.') {
-				result.error = "Invalid message.";
-				res.send(JSON.stringify(result));
-			}
-			var decryptedData = JSON.parse(decryptedData.plaintext);
+			var decryptedData = decryptRequest(data, res);
+			var decryptedData = decryptedData.data;
 			var pubkey = decryptedData.pubkey;
 
 			if (isValidPubkey(pubkey)) {
@@ -142,14 +177,13 @@ var main = function() {
 					if (row == undefined) {
 						doesNotExist(pubkey);
 					} else {
-						result.message = 'That key is already in use.';
-						result.kid = row['rowid'];
+						result = {message: 'That key is already in use.', kid: row['rowid']}
 						toSend = encryptOutgoing(result, decryptedData.pubkey);
 						res.send(toSend);
 					}
 				});
 			} else {
-				result.error = "That key is invalid.";
+				result = {error: 'That key is invalid.'}
 				res.send(JSON.stringify(result));
 			}
 		});

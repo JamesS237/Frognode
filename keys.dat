@@ -21,10 +21,20 @@ defaultpayloadlengthextrabytes = 14000
 minimizeonclose = false
 maxacceptablenoncetrialsperbyte = 0
 maxacceptablepayloadlengthextrabytes = 0
-daemon = True
+daemon = false
 apienabled = True
 apiport = 8442
 apiinterface = localhost
 apiusername = Frog
 apipassword = testpass
+
+[BM-2D8h8osC2C3vFPQGr7SryHWrgpNx6su5cf]
+label = u
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5HrqMZTZit8HWmWvHNJVv7NeT1ccouWgR9SBD9B91xPjGCDykQC
+privencryptionkey = 5KCfSfcp37v9jajzDjWyGprbAuce3Yv7wh69384KX2r5HWiGVDG
+lastpubkeysendtime = 1376034845
 
