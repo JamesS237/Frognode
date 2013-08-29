@@ -55,7 +55,7 @@ var add = function() {
 }
 
 //give pybitmessage time to start up
-setTimeout(add, 1000);
+setTimeout(add, 1500);
 
 //utility functions
 function isValidPubkey(pubkey) {
@@ -99,8 +99,22 @@ function encryptOutgoing(data, key) {
 function setGlobalHeaders(res) {
 	res.header("Access-Control-Allow-Origin", "*"); //ok, sure whatever
 }
+function keyIDCheck(keyID, key, callback) {
+	//get address
+	function sqlDone(row) {
+		if (row['pubkey'] == key) {
+			callback(true);
+		} else {
+			callback(false);
+		}
+	}
+	stmt = db.prepare('select pubkey from Users where rowid=(?)');
+	stmt.get(keyID, function(err, row) {
+		sqlDone(row);
+	});
+}
 //main program
-//note: send decrypted data when the message is a crypto error. encrypt all other times.
+//note: send decrypted data when the message is a crypto or signing error. encrypt all other times.
 var main = function() {
 	if (started) {
 		app.use(express.bodyParser());
@@ -108,42 +122,90 @@ var main = function() {
 			setGlobalHeaders(res);
 			var data = req.body.data;
 			var decryptedData = decryptRequest(data, res);
-			var decryptedData = decryptedData.data;
+			var dData = decryptedData.data;
 
+			keyID = dData.kid;
+
+			function keyIDValid(valid) {
+
+			}
+			keyIDCheck(keyID, pubkey, keyIDValid);
 		});
 		app.post('/getaddresses', function(req, res) {
+			setGlobalHeaders(res);
+			var data = req.body.data;
+			var decryptedData = decryptRequest(data, res);
+			var dData = decryptedData.data;
+			keyID = dData.kid;
+
+			function keyIDValid(valid) {
+				function sqlDone(rows) {
+					result = {addresses: rows};
+					toSend = encryptOutgoing(result, decryptedData.pubkey);
+					res.send(toSend);
+				}
+				if (valid) {
+					stmt = db.prepare('select * from Addresses where userid=(?)');
+					stmt.all(keyID, function(err, rows) {
+						sqlDone(rows);
+					});
+				} else {
+					result = {error: 'Your signing key didn\'t match the keyID.'};
+					res.send(JSON.stringify(result));
+				}
+			}
+			keyIDCheck(keyID, pubkey, keyIDValid);
 
 		});
-		app.post('/getinbox', function(req, res) {
+		app.post('/getmessage', function(req, res) {
 			setGlobalHeaders(res);
 			var data = req.body.data;
 			var decryptedData = decryptRequest(data, res);
 			var dData = decryptedData.data;
 
+			var msgId = dData.msgid;
+
+		});
+		app.post('/getinbox', function(req, res) {
+			console.log('getinbox request');
+			setGlobalHeaders(res);
+			var data = req.body.data;
+			var decryptedData = decryptRequest(data, res);
+			var dData = decryptedData.data;
+			var pubkey = decryptedData.pubkey;
+
 			function sqlDone(addresses) {
-				function rpcDone(data) {
-					var decodedMessages = [];
-					for (var i = 0; i < data.inboxMessages.length; i++) {
-						decodedMessage = data.inboxMessages[i];
-						decodedMessage.subject = new Buffer(data.inboxMessages[i].subject, 'base64').toString('ascii');
-						decodedMessage.message = new Buffer(data.inboxMessages[i].message, 'base64').toString('ascii');
-						decodedMessages.push(decodedMessage);
-					}
-					var result = {messages: decodedMessages};
-					var toSend = encryptOutgoing(result, decryptedData.pubkey);
-					res.send(toSend);
-				}
+				var decodedMessages = [];
 				for (var i = 0; i < addresses.length; i++) {
-						rpcClient.methodCall('getInboxMessagesByAddress', [addresses[i].address], function(err, val) {
-						rpcDone(JSON.parse(val));
+					rpcClient.methodCall('getInboxMessagesByAddress', [addresses[i].address], function(err, val) {
+						messages = JSON.parse(val);
+						for (var i = 0; i < data.inboxMessages.length; i++) {
+							decodedMessage = data.inboxMessages[i];
+							decodedMessage.subject = new Buffer(data.inboxMessages[i].subject, 'base64').toString('ascii');
+							decodedMessage.message = new Buffer(data.inboxMessages[i].message, 'base64').toString('ascii');
+							decodedMessages.push(decodedMessage);
+						}
+
 					});
 				}
+				result = {messages: decodedMessages};
+				toSend = encryptOutgoing(result, decryptedData.pubkey);
+				res.send(toSend);
 			}
 			var keyID = dData.kid;
-			stmt = db.prepare('select * from Addresses where userid=(?)');
-			stmt.all(keyID, function(err, rows) {
-				sqlDone(rows);
-			});
+			function keyIDValid(valid) {
+				if (valid) {
+					stmt = db.prepare('select * from Addresses where userid=(?)');
+					stmt.all(keyID, function(err, rows) {
+						sqlDone(rows);
+					});
+				} else {
+					result = {error: 'Your signing key didn\'t match the keyID.'};
+					res.send(JSON.stringify(result));
+				}
+			}
+			keyIDCheck(keyID, pubkey, keyIDValid);
+
 		});
 		app.post('/newuser', function(req, res) {
 			setGlobalHeaders(res);
@@ -165,7 +227,6 @@ var main = function() {
 			}
 			var data = req.body.data;
 			var decryptedData = decryptRequest(data, res);
-			var decryptedData = decryptedData.data;
 			var pubkey = decryptedData.pubkey;
 
 			if (isValidPubkey(pubkey)) {
@@ -196,7 +257,7 @@ var main = function() {
 	}
 }
 // .1 seconds after giving pybitmessage time, start up web server.
-setTimeout(main, 1100);
+setTimeout(main, 1600);
 
 process.on('SIGINT', function() {
   console.log("\ngracefully shutting down from  SIGINT (Crtl-C)");

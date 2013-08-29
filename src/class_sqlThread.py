@@ -6,6 +6,7 @@ import shutil  # used for moving the messages.dat file
 import sys
 import os
 from debug import logger
+from namecoin import ensureNamecoinOptions
 
 # This thread exists because SQLITE3 is so un-threadsafe that we must
 # submit queries to it and it puts results back in a different queue. They
@@ -46,7 +47,7 @@ class sqlThread(threading.Thread):
             self.cur.execute(
                 '''CREATE TABLE pubkeys (hash blob, transmitdata blob, time int, usedpersonally text, UNIQUE(hash) ON CONFLICT REPLACE)''' )
             self.cur.execute(
-                '''CREATE TABLE inventory (hash blob, objecttype text, streamnumber int, payload blob, receivedtime integer, UNIQUE(hash) ON CONFLICT REPLACE)''' )
+                '''CREATE TABLE inventory (hash blob, objecttype text, streamnumber int, payload blob, receivedtime integer, first20bytesofencryptedmessage blob, UNIQUE(hash) ON CONFLICT REPLACE)''' )
             self.cur.execute(
                 '''CREATE TABLE knownnodes (timelastseen int, stream int, services blob, host blob, port blob, UNIQUE(host, stream, port) ON CONFLICT REPLACE)''' )
                              # This table isn't used in the program yet but I
@@ -55,15 +56,14 @@ class sqlThread(threading.Thread):
                 '''INSERT INTO subscriptions VALUES('Bitmessage new releases/announcements','BM-GtovgYdgs7qXPkoYaRgrLFuFKz1SFpsw',1)''')
             self.cur.execute(
                 '''CREATE TABLE settings (key blob, value blob, UNIQUE(key) ON CONFLICT REPLACE)''' )
-            self.cur.execute( '''INSERT INTO settings VALUES('version','1')''')
+            self.cur.execute( '''INSERT INTO settings VALUES('version','2')''')
             self.cur.execute( '''INSERT INTO settings VALUES('lastvacuumtime',?)''', (
                 int(time.time()),))
             self.conn.commit()
-            print 'Created messages database file'
+            logger.info('Created messages database file')
         except Exception as err:
             if str(err) == 'table inbox already exists':
-                with shared.printLock:
-                    print 'Database file already exists.'
+                logger.debug('Database file already exists.')
 
             else:
                 sys.stderr.write(
@@ -145,13 +145,13 @@ class sqlThread(threading.Thread):
         self.cur.execute(item, parameters)
         if self.cur.fetchall() == []:
             # The settings table doesn't exist. We need to make it.
-            print 'In messages.dat database, creating new \'settings\' table.'
+            logger.debug('In messages.dat database, creating new \'settings\' table.')
             self.cur.execute(
                 '''CREATE TABLE settings (key text, value blob, UNIQUE(key) ON CONFLICT REPLACE)''' )
             self.cur.execute( '''INSERT INTO settings VALUES('version','1')''')
             self.cur.execute( '''INSERT INTO settings VALUES('lastvacuumtime',?)''', (
                 int(time.time()),))
-            print 'In messages.dat database, removing an obsolete field from the pubkeys table.'
+            logger.debug('In messages.dat database, removing an obsolete field from the pubkeys table.')
             self.cur.execute(
                 '''CREATE TEMPORARY TABLE pubkeys_backup(hash blob, transmitdata blob, time int, usedpersonally text, UNIQUE(hash) ON CONFLICT REPLACE);''')
             self.cur.execute(
@@ -162,17 +162,17 @@ class sqlThread(threading.Thread):
             self.cur.execute(
                 '''INSERT INTO pubkeys SELECT hash, transmitdata, time, usedpersonally FROM pubkeys_backup;''')
             self.cur.execute( '''DROP TABLE pubkeys_backup;''')
-            print 'Deleting all pubkeys from inventory. They will be redownloaded and then saved with the correct times.'
+            logger.debug('Deleting all pubkeys from inventory. They will be redownloaded and then saved with the correct times.')
             self.cur.execute(
                 '''delete from inventory where objecttype = 'pubkey';''')
-            print 'replacing Bitmessage announcements mailing list with a new one.'
+            logger.debug('replacing Bitmessage announcements mailing list with a new one.')
             self.cur.execute(
                 '''delete from subscriptions where address='BM-BbkPSZbzPwpVcYZpU4yHwf9ZPEapN5Zx' ''')
             self.cur.execute(
                 '''INSERT INTO subscriptions VALUES('Bitmessage new releases/announcements','BM-GtovgYdgs7qXPkoYaRgrLFuFKz1SFpsw',1)''')
-            print 'Commiting.'
+            logger.debug('Commiting.')
             self.conn.commit()
-            print 'Vacuuming message.dat. You might notice that the file size gets much smaller.'
+            logger.debug('Vacuuming message.dat. You might notice that the file size gets much smaller.')
             self.cur.execute( ''' VACUUM ''')
 
         # After code refactoring, the possible status values for sent messages
@@ -189,7 +189,22 @@ class sqlThread(threading.Thread):
         
         if not shared.config.has_option('bitmessagesettings', 'sockslisten'):
             shared.config.set('bitmessagesettings', 'sockslisten', 'false')
-
+            
+        ensureNamecoinOptions()
+            
+        # Add a new column to the inventory table to store the first 20 bytes of encrypted messages to support Android app
+        item = '''SELECT value FROM settings WHERE key='version';'''
+        parameters = ''
+        self.cur.execute(item, parameters)
+        if int(self.cur.fetchall()[0][0]) == 1:
+            print 'upgrading database'
+            item = '''ALTER TABLE inventory ADD first20bytesofencryptedmessage blob DEFAULT '' '''
+            parameters = ''
+            self.cur.execute(item, parameters)
+            item = '''update settings set value=? WHERE key='version';'''
+            parameters = (2,)
+            self.cur.execute(item, parameters)
+        
         try:
             testpayload = '\x00\x00'
             t = ('1234', testpayload, '12345678', 'no')
@@ -203,11 +218,11 @@ class sqlThread(threading.Thread):
             self.cur.execute('''DELETE FROM pubkeys WHERE hash='1234' ''')
             self.conn.commit()
             if transmitdata == '':
-                sys.stderr.write('Problem: The version of SQLite you have cannot store Null values. Please download and install the latest revision of your version of Python (for example, the latest Python 2.7 revision) and try again.\n')
-                sys.stderr.write('PyBitmessage will now exit very abruptly. You may now see threading errors related to this abrupt exit but the problem you need to solve is related to SQLite.\n\n')
+                logger.fatal('Problem: The version of SQLite you have cannot store Null values. Please download and install the latest revision of your version of Python (for example, the latest Python 2.7 revision) and try again.\n')
+                logger.fatal('PyBitmessage will now exit very abruptly. You may now see threading errors related to this abrupt exit but the problem you need to solve is related to SQLite.\n\n')
                 os._exit(0)
         except Exception as err:
-            print err
+            logger.error(err)
 
         # Let us check to see the last time we vaccumed the messages.dat file.
         # If it has been more than a month let's do it now.
@@ -218,7 +233,7 @@ class sqlThread(threading.Thread):
         for row in queryreturn:
             value, = row
             if int(value) < int(time.time()) - 2592000:
-                print 'It has been a long time since the messages.dat file has been vacuumed. Vacuuming now...'
+                logger.info('It has been a long time since the messages.dat file has been vacuumed. Vacuuming now...')
                 self.cur.execute( ''' VACUUM ''')
                 item = '''update settings set value=? WHERE key='lastvacuumtime';'''
                 parameters = (int(time.time()),)
@@ -230,13 +245,11 @@ class sqlThread(threading.Thread):
                 self.conn.commit()
             elif item == 'exit':
                 self.conn.close()
-                with shared.printLock:
-                    print 'sqlThread exiting gracefully.'
+                logger.info('sqlThread exiting gracefully.')
 
                 return
             elif item == 'movemessagstoprog':
-                with shared.printLock:
-                    print 'the sqlThread is moving the messages.dat file to the local program directory.'
+                logger.debug('the sqlThread is moving the messages.dat file to the local program directory.')
 
                 self.conn.commit()
                 self.conn.close()
@@ -246,8 +259,7 @@ class sqlThread(threading.Thread):
                 self.conn.text_factory = str
                 self.cur = self.conn.cursor()
             elif item == 'movemessagstoappdata':
-                with shared.printLock:
-                    print 'the sqlThread is moving the messages.dat file to the Appdata folder.'
+                logger.debug('the sqlThread is moving the messages.dat file to the Appdata folder.')
 
                 self.conn.commit()
                 self.conn.close()
@@ -268,10 +280,8 @@ class sqlThread(threading.Thread):
                 try:
                     self.cur.execute(item, parameters)
                 except Exception as err:
-                    with shared.printLock:
-                        sys.stderr.write('\nMajor error occurred when trying to execute a SQL statement within the sqlThread. Please tell Atheros about this error message or post it in the forum! Error occurred while trying to execute statement: "' + str(
-                            item) + '"  Here are the parameters; you might want to censor this data with asterisks (***) as it can contain private information: ' + str(repr(parameters)) + '\nHere is the actual error message thrown by the sqlThread: ' + str(err) + '\n')
-                        sys.stderr.write('This program shall now abruptly exit!\n')
+                    logger.fatal('Major error occurred when trying to execute a SQL statement within the sqlThread. Please tell Atheros about this error message or post it in the forum! Error occurred while trying to execute statement: "%s"  Here are the parameters; you might want to censor this data with asterisks (***) as it can contain private information: %s. Here is the actual error message thrown by the sqlThread: %s', str(item), str(repr(parameters)),  str(err))
+                    logger.fatal('This program shall now abruptly exit!')
 
                     os._exit(0)
 
