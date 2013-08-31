@@ -1,6 +1,6 @@
 node_modules/
 knownnodes.dat
-keys(copy).dat
+keys.dat
 messages.dat
 messages.dat-journal
 node.sqlite

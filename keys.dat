@@ -27,4 +27,359 @@ apiport = 8442
 apiinterface = localhost
 apiusername = Frog
 apipassword = testpass
+namecoinrpctype = namecoind
+namecoinrpchost = localhost
+namecoinrpcuser = 
+namecoinrpcpassword = 
+namecoinrpcport = 8336
+
+[BM-2D9hNpXmjAkJbRmnkHWRCrPj4SeHhT3i86]
+label = asdf
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5J7N2WhLLhVStJYWA2tiXStqyVBg27qDZVQHWk3Uv9Zm3ueXq3B
+privencryptionkey = 5JpW3ke2g6FCpTY9sFL7WZogfq825Q2NGbC2dqmN5Cmr2EZMc9k
+lastpubkeysendtime = 1377933518
+
+[BM-2D7qHgtwJhUPJczdrvh5ztC4cpfkdXHsfq]
+label = asdf
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5J3mXpUXv77SowKLorDbMRN6X9PLd4cYa865tu9nQFuGe6VhfVw
+privencryptionkey = 5JYa1mpc6fA7qY3vgx8HJ25qd715kS6BjBZcENX8Jn2h5scnGiw
+
+[BM-2D9yHsP2GK5dg59rY7r6qAwK6CCw6D4tn7]
+label = Super awesome new address.
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JhcwVokUPfWMSzaBQHjsbDuPxFJGhzyVh8QynJvABreT1Z4tEU
+privencryptionkey = 5KDLxTyZGPUNE3TwM3rr23bYAyfLiH5XshVNbXrqvFHxc5UsZ2r
+lastpubkeysendtime = 1377981198
+
+[BM-2DBgsrAcDTqLGnbxJRZePn1NcM3BZR9wZR]
+label = memememememememememe
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5KDrbZ2oxvy2aVkiHGx8T7mGJfbTKM64Zwf49koRWbpiVpSvMPF
+privencryptionkey = 5KFgyWQCFo48qtZF1dUfpm8uYdRV3jdQGfVBFLwAGdUNxXvoXGC
+
+[BM-2D92o5xynLSE4eeTGcNrazKWxu45gFfF7h]
+label = asdf2
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JD4fQDaQidG4NH4tZiLWvh3ggXdd8MWvmnanBY68oG422BePr2
+privencryptionkey = 5JpKtSZhTKetK9ZvQ2PpusrxrcsueohHJycMVShZhNJFdiZp3g2
+
+[BM-2DC9bzCFutrqpfVfsZSqtnEE453QXraDF1]
+label = dd
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JW49FRjdAtDC3iRHNBzdYAjVF7sFrLoeur2xZznzkbUsWGorFq
+privencryptionkey = 5KLwELjj5PRhrcu2SMjVAnXf92Xvmygc88oeaqT2ULQ7tyijPMo
+lastpubkeysendtime = 1377934925
+
+[BM-2DBj67X7MbX5LjzfbQ1h3zk36wSLaogJtC]
+label = 23456
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JBoSHSiyWykuKUX5SgGjLGRqE8YxCSdxzLLPAVP4EWVuhqf1Ai
+privencryptionkey = 5JPyJ5vgWyNLXw2CrAgPXA7jRKMiiyoPQ44zZ6uGr5M1kjaMWD3
+lastpubkeysendtime = 1377935226
+
+[BM-2D7NKLPcFo7ftd9kGLxdPnHG7rUZqodc5D]
+label = 3
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5KJq2Ehb4VQryHTMf8Z7TaJk352Kd8FSaaX6uZVtwSTb56XqABb
+privencryptionkey = 5J6VSqof4ASCHeairtjzNZ244AuPLFpp6nJfG4iYGZfUwpKEwxE
+lastpubkeysendtime = 1377935326
+
+[BM-2D9XBWmL5qJb9Xvx9BGmq7BBuhN78e4bmp]
+label = 1
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JeoTLSj1x7MoKXmrG4GJfuQxT2rE4rVUhuNGeqGA85WNkKpmCZ
+privencryptionkey = 5KCk9sbv3kUT7ncmp43dmFg7exWo8vWEVDwTGnJQwmW91aujVAM
+lastpubkeysendtime = 1377935498
+
+[BM-2DAnD1DjWYhnpw4F7c89WJJPHhv6Tn5EEK]
+label = 2
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JhpAaKuYwrUbeeDcvhu243BB4pNdHmk4FXRZMgCXx9eVCASZMi
+privencryptionkey = 5JRTNCXxsPsBDzqJPrhmdkdAYAeoMihJ7XARKYrETBT2ZdHEDd3
+lastpubkeysendtime = 1377935597
+
+[BM-2DBQNrtvvet6nq28cRDoStaaxjyFN16v8J]
+label = 5
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5HzkJiKD2LDn1CC9JBWQpycPH83aA3n81Efm3S4AnMu2hznmfPR
+privencryptionkey = 5Jxzap4k3X3SW77KK3J7xsyMSHseL8RLSF6UL65NV34jirAoCvB
+
+[BM-2D8F2rF25yyk2GqbRHfxe6JXGhqYUqnKkD]
+label = 1234
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JawpotHNWnuNvvL4rEh59FYjCd9LALVuo7UcUMuqWVgaGW8fkz
+privencryptionkey = 5Kh9cmJzbtZvHB7aRMNYUD9y6C3A8TYekedKPsgP5sVHkGBV9x7
+lastpubkeysendtime = 1377935728
+
+[BM-2DBVAMuH6kgWTWBCBAraK2ouWpddB72fc9]
+label = 123445
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5KVtSpgbmpVo5kW6xgAPcSzAyRSfphfCig8dn67TK48Q87uw14c
+privencryptionkey = 5JgDUQ9YTmG7gVFCfptyZL8EuYetnnDZ71bqRXJMHnHdEsEkeBn
+lastpubkeysendtime = 1377935840
+
+[BM-2D8PeBT1gsEBEaNUaGkdjsJB43yEZp9kQe]
+label = 1234456
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JcKzNwi8odGa2AbACxJ6XLFS63i8djRRUscUjcvTgvd6n1vbiP
+privencryptionkey = 5JZmzh8jvFQ6f98gaPxsoa8SWJo4AupvpdLRkhpQZcvNXt8NFQ2
+
+[BM-2DB1NLgLdYkwN5JZqN5gvRBfkqnRKp1pKZ]
+label = 69 IS 2YOLO4YOU
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JxgvKWqyLZ6CmHN8qaVtTH4ZTMyiWpJsRFG1q2an1MFDxaCZyg
+privencryptionkey = 5KXZXV75Ror4PeqRxf9GMkWnDuSFmzLTor5mMH8vVPRTe1sTowS
+
+[BM-2DB9psJeM2noW2TFwBc73QKQVZqA27ikEy]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JMwwJrtfeufYsf1VzpeMVATQJnyQhKUKR4kpPaCi7mV3nExAPN
+privencryptionkey = 5JGc1SQP4xtgmc8wcFeKm5QUmxouS57jTDAg5LeNZHQrgoj4jqc
+lastpubkeysendtime = 1377936588
+
+[BM-2DBDEaBMBcddavKkfUR8ZdCHoyNi94CfFJ]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5KbK78C6yzGbrQ8vXMPuAXbXZjpgvtp78T4M2a6hcuqWDJmCGQx
+privencryptionkey = 5K6S6GnCcvAEvMkySqHhQmxx1tqrtZEET1X9soKz8c4aa2ba8qh
+lastpubkeysendtime = 1377936592
+
+[BM-2DApG4qbi2KBsGYUzJ5MvA7RAAYpvTQfHF]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JjNb9de8kCaXPj5WKFiKLBvYtFkwmpujtgCaXzjrKd4TSDUqZy
+privencryptionkey = 5J4XCNTRhuGq7EHNkWXeznPpH1U9au8qrJ65BtYos2RjZGPp1rt
+lastpubkeysendtime = 1377936593
+
+[BM-2DB2WEN8oTo85Gs8LhoJariUARH2Mm3roH]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JwoBiRfVrYPxpdA5fqX8LheYiTqirSorxomXVLwkD5Ze6u5Ser
+privencryptionkey = 5JkcyCsRXszhAqwEC6r16Fnurg5fEZmQwKh3fhc3SprJGZqgq1x
+lastpubkeysendtime = 1377936607
+
+[BM-2D8ix7vuxKPYxcg6bounKU1qxWLxwKNeDv]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5Kk8RKsGQftSZiT6fNzdXYCDvgA7ytzGrKSTsNt6jWcNFBo9vDk
+privencryptionkey = 5JHsRjwnnKRR2F6o1tRxke2Jc6J9Y3B9LsjhFjnEcFXQwHjemus
+lastpubkeysendtime = 1377936609
+
+[BM-2D7Njt3YpYHcfFVEFnyrZ1PGV7s8gMYBwB]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JhSPg6kL6iHaGUoG1pGfzAYeRLL1UnWZ9rrxDHewg8oC7FBskv
+privencryptionkey = 5JTD6QXVRoL9BxUbnRz6fhRc46rTu216dAGGVmaF2wwCxQdgvXe
+lastpubkeysendtime = 1377936624
+
+[BM-2DBuZsiCfENwE9CsCWEHni78PzKSVj2wiM]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JQtMmoyuTHB4kthojkZfQn2hXqNXoAhj1J9b35ujJjHNakwgWq
+privencryptionkey = 5KakbYE8CTnmsVf5dYQuFkyfXAHNUp6w7c8bXnJA41gJezeXBcn
+
+[BM-2D9Vy1B3zhvpQmMuDS9r4Foe2H2pGQWuLm]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JanqgXMYrhex9ChnzKEvPakoyn2u3oGhE66VM1do4jbgCUAShc
+privencryptionkey = 5KQCEhwMqkx9JdS8mo79g2qQfmJUCRfdpCTaX5pLzHhqtJ2TxkQ
+
+[BM-2DB7bpQgKgdg3dmCwbc1zqDaZmiajjLikg]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JCjpSVZoSwGyWN3a2NXWU2hByVBKo32q3K2mXG8G7LjUXDGuqu
+privencryptionkey = 5J2EpQsoUengc6zqgqvRd2xKF4xHeecdnkdB3UhatZcA7XnqPhk
+
+[BM-2D7qscAsD2qrCDdqykgeKmCbKo69jG1u8s]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5KKH7n86bAFtBdCxoH4hifmmS9uEsVdNustYft3ribNqqnGzDdh
+privencryptionkey = 5KYPUCeJRLFngeH6UUK88dbvUfHausyRbbNDZ5chCHAiXR6W6sf
+lastpubkeysendtime = 1377936641
+
+[BM-2DBBmeLcz5ctT3WRH1Gh4UtrhswHJWRae3]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5JpR7obxgEmm5zA6eggPq4SpsSkPMygXnWdTvohyue929Rmukh9
+privencryptionkey = 5K7US5r5dofbRwfJTVUgUvbDRMZjsertJrxsDpmNDFb1qUcnMxa
+lastpubkeysendtime = 1377936643
+
+[BM-2DB9u6v3a2UHtpTpVVGKcmGLmDnAhm2DnL]
+label = new address label
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5KF4Ttgb9xbba34CwGGonysMGYrmozJKWWpiMCc5kPYkX1Cq4j3
+privencryptionkey = 5Jhn5AZshTDCsBgwokZ7iuGq89X8BU38LUy7zjw9DERyYM8UmpR
+
+[BM-2D871PgdZ7WgsBK3wHCiJRDMMLYCZkbYyU]
+label = nelly!!
+enabled = true
+decoy = false
+noncetrialsperbyte = 336
+payloadlengthextrabytes = 15555
+privsigningkey = 5J5QZXZv6fhhAsc6xS99iCEKGe9ngnEzBRsvt62KdiKUGw246LF
+privencryptionkey = 5JkBQp6mQ6paHMqEKAMhzoqPoUZToWQM1Y7mdiohBLefYMe6YM8
+lastpubkeysendtime = 1377936698
+
+[BM-2D9sz3Uu6MMhNneBAxLN8WbcF8EZ6JCEyc]
+label = asdf
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JwfitBGTx6TDX1EDtEVmFqoX2X9C3We47zvhvxt38dmvzq83fE
+privencryptionkey = 5JKhE2k75gtQ57pYFMVDP1Pu7A2y5TGKa4sMVgKTs7AbBwGqEHo
+lastpubkeysendtime = 1377980801
+
+[BM-2DBi7FTWMNugNzfmThy7br91rgbd2ZbaEa]
+label = asdff
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5K3NL5M7xTYtUGNPgxBcZ3WWRAED9TnCQ62ckHEhc3tW7zGCdUr
+privencryptionkey = 5K6R7tSMQDKVteEr4oTWgcafd3J7gyCmSBcW3i4QtaSHJ7nKRKY
+lastpubkeysendtime = 1377980818
+
+[BM-2D8q6gpVcQpuxkQZHnkY3bLKEU4ehpre84]
+label = asdff33
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5J2Kij2aKDn8M8soayyM2GznADGHshEpUJoNDGU7SmAoKpM9xuh
+privencryptionkey = 5JDuTsXaftXb1VK1NdR9AqJ5gekrqLd5a16WBWcQJPzBVX6Fe9D
+lastpubkeysendtime = 1377980836
+
+[BM-2D7dcVMxokJ6gv2wMgbq5TqL3kR5VUViJo]
+label = asdff33444444
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JJp3XXuyKpuwKFU6tSwpZzLQU8rNG8Lq3RoxEb4cQZKhUsFdfj
+privencryptionkey = 5KUCkq7pW96E911XdNcjq619mWQsKpYQC7ZgTCHrh9HccebZbaK
+lastpubkeysendtime = 1377980854
+
+[BM-2DBdC93gTRb1oAQjnvPG6iNWjpu474oFUD]
+label = asdff33444444
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JnxffhTTjfNW2SoPkdBfh2WMmF6XdG2smfJV84d3vYESGZWhwy
+privencryptionkey = 5KX3h27q3XTSi9SVftHYCswgScxSUTNN7kshm5aRmjaGtxatrat
+lastpubkeysendtime = 1377980859
+
+[BM-2DAdWuAqHgWBVG5sfs783CCFw2YhLAdCYK]
+label = asdff33444444
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JJ8dcsT7iiAbv57suevtVWrCn9vi9kGcGZMyBhABbbSYba9Ygi
+privencryptionkey = 5KXd1nLouGEFGXoH2LxLtMyzEsZQ3SEhBifSGxJ3ZCuqrfJMA4K
+lastpubkeysendtime = 1377980861
+
+[BM-2DBUTyKU6y3NKykdEU9ZqWT2YVRK9NJm34]
+label = ohhhh. i am so disappoint.
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5JYbnrVXbL477hAFGoRBRr7QFe2FJSFYcFKPWPMsJbaaaYJ6L5G
+privencryptionkey = 5KiGedpcyBpCDraVquC8Pe8FWu36qVsVAtWEFgYTPiWho8bm8af
+lastpubkeysendtime = 1377980889
+
+[BM-2D9BZTmEkEeEt7zzsn38F1NW1N6wwJcWES]
+label = this is sad much so much.
+enabled = true
+decoy = false
+noncetrialsperbyte = 320
+payloadlengthextrabytes = 14000
+privsigningkey = 5HuimTFFcRpdZXk1MLLZKhjTMLxS9Mx9vgBs8wWgsAsZtAZQLMf
+privencryptionkey = 5Jg8G8FPe2kmtDCHHhhnXspZHb622RuDNjLtxS7dLEb1on22RAC
+lastpubkeysendtime = 1377980923
 
