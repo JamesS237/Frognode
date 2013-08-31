@@ -185,9 +185,15 @@ function main(BitmessageStatus) {
 
 			function sqlDone(addresses) {
 				var decodedMessages = [];
+				function sendInbox(messages) {
+					result = {messages: messages};
+					toSend = encryptOutgoing(result, pubkey);
+					res.send(toSend);
+				}
+				var requestCounter = 0;
 				for (var i = 0; i < addresses.length; i++) {
 					rpcClient.methodCall('getInboxMessagesByAddress', [addresses[i].address], function(err, val) {
-						console.log(decodedMessages);
+						requestCounter += 1;
 						messages = JSON.parse(val);
 						for (var i = 0; i < messages.inboxMessages.length; i++) {
 							decodedMessage = {};
@@ -198,12 +204,11 @@ function main(BitmessageStatus) {
 							decodedMessage.timeReceived = messages.inboxMessages[i].receivedTime;
 							decodedMessages.push(decodedMessage);
 						}
+						if (requestCounter == addresses.length) {
+							sendInbox(decodedMessages);
+						}
 					});
 				}
-				result = {messages: decodedMessages};
-				console.log('result:' + result.decodedMessages);
-				toSend = encryptOutgoing(result, decryptedData.pubkey);
-				res.send(toSend);
 			}
 			var keyID = dData.kid;
 			function keyIDValid(valid) {
