@@ -100,12 +100,30 @@ function toBase64(string) {
 	result = new Buffer(string).toString('base64');
 	return result;
 }
+function checkIfNonceUnused(nonce, callback, request) { //also insert in db
+	function insertNonce(nonce) {
+		stmt = db.prepare('insert into UsedNonces (nonce) values (?)');
+		stmt.run(nonce, callback);
+	}
+	stmt = db.prepare('select exists(select 1 from UsedNonces where nonce=(?) limit 1)');
+	stmt.get(nonce, function(err, row) {
+		if (row['exists(select 1 from UsedNonces where nonce=(?) limit 1)'] == 0 && !err) {
+			insertNonce(nonce);
+		} else {
+			console.log('used nonce!');
+			result = {error: 'nonce already used'};
+			request.send(JSON.stringify(result));
+		}
+	});
+}
 //main program
 //note: send decrypted data when the message is a crypto or signing error. encrypt all other times.
 function main(BitmessageStatus) {
 	if (BitmessageStatus == true) {
 		app.use(express.bodyParser());
-
+		app.post('/sendmessage', function(req, res) {
+			//todo: do this
+		});
 		app.post('/newaddress', function(req, res) {
 			console.log('newaddress request');
 			setGlobalHeaders(res);
@@ -115,6 +133,7 @@ function main(BitmessageStatus) {
 
 			keyID = dData.kid;
 			label = dData.label;
+
 			function insertAddress(address, label, keyID) {
 				 stmt = db.prepare('insert into Addresses (address, label, userid) values (?, ?, ?)');
 				 values = [address, label, keyID];
@@ -125,20 +144,23 @@ function main(BitmessageStatus) {
 				 toSend = encryptOutgoing(result, decryptedData.pubkey);
 				 res.send(toSend);
 			}
-			function keyIDValid(valid) {
-				if (valid) {
-					labelBase64 = toBase64(label);
-					rpcClient.methodCall('createRandomAddress', [labelBase64], function(err, val) {
-						if (err == null) {
-							insertAddress(val, label, keyID);
-						}
-					});
-				} else {
-					result = {error: 'Your signing key didn\'t match the keyID.'};
-					res.send(JSON.stringify(result));
+			function nonceUnused() {
+				function keyIDValid(valid) {
+					if (valid) {
+						labelBase64 = toBase64(label);
+						rpcClient.methodCall('createRandomAddress', [labelBase64], function(err, val) {
+							if (err == null) {
+								insertAddress(val, label, keyID);
+							}
+						});
+					} else {
+						result = {error: 'Your signing key didn\'t match the keyID.'};
+						res.send(JSON.stringify(result));
+					}
 				}
+				keyIDCheck(keyID, pubkey, keyIDValid);
 			}
-			keyIDCheck(keyID, pubkey, keyIDValid);
+			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
 		app.post('/getaddresses', function(req, res) {
 			console.log('getaddresses request');
@@ -146,34 +168,29 @@ function main(BitmessageStatus) {
 			var data = req.body.data;
 			var decryptedData = decryptRequest(data, res);
 			var dData = decryptedData.data;
+
 			keyID = dData.kid;
 
-			function keyIDValid(valid) {
-				function sqlDone(rows) {
-					result = {addresses: rows};
-					toSend = encryptOutgoing(result, decryptedData.pubkey);
-					res.send(toSend);
+			function nonceUnused() {
+				function keyIDValid(valid) {
+					function sqlDone(rows) {
+						result = {addresses: rows};
+						toSend = encryptOutgoing(result, decryptedData.pubkey);
+						res.send(toSend);
+					}
+					if (valid) {
+						stmt = db.prepare('select * from Addresses where userid=(?)');
+						stmt.all(keyID, function(err, rows) {
+							sqlDone(rows);
+						});
+					} else {
+						result = {error: 'Your signing key didn\'t match the keyID.'};
+						res.send(JSON.stringify(result));
+					}
 				}
-				if (valid) {
-					stmt = db.prepare('select * from Addresses where userid=(?)');
-					stmt.all(keyID, function(err, rows) {
-						sqlDone(rows);
-					});
-				} else {
-					result = {error: 'Your signing key didn\'t match the keyID.'};
-					res.send(JSON.stringify(result));
-				}
+				keyIDCheck(keyID, pubkey, keyIDValid);
 			}
-			keyIDCheck(keyID, pubkey, keyIDValid);
-		});
-		app.post('/getmessage', function(req, res) {
-			setGlobalHeaders(res);
-			var data = req.body.data;
-			var decryptedData = decryptRequest(data, res);
-			var dData = decryptedData.data;
-
-			var msgId = dData.msgid;
-
+			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
 		app.post('/getinbox', function(req, res) {
 			console.log('getinbox request');
@@ -211,19 +228,21 @@ function main(BitmessageStatus) {
 				}
 			}
 			var keyID = dData.kid;
-			function keyIDValid(valid) {
-				if (valid) {
-					stmt = db.prepare('select * from Addresses where userid=(?)');
-					stmt.all(keyID, function(err, rows) {
-						sqlDone(rows);
-					});
-				} else {
-					result = {error: 'Your signing key didn\'t match the keyID.'};
-					res.send(JSON.stringify(result));
+			function nonceUnused() {
+				function keyIDValid(valid) {
+					if (valid) {
+						stmt = db.prepare('select * from Addresses where userid=(?)');
+						stmt.all(keyID, function(err, rows) {
+							sqlDone(rows);
+						});
+					} else {
+						result = {error: 'Your signing key didn\'t match the keyID.'};
+						res.send(JSON.stringify(result));
+					}
 				}
+				keyIDCheck(keyID, pubkey, keyIDValid);
 			}
-			keyIDCheck(keyID, pubkey, keyIDValid);
-
+			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
 		app.post('/newuser', function(req, res) {
 			setGlobalHeaders(res);
@@ -245,26 +264,30 @@ function main(BitmessageStatus) {
 			}
 			var data = req.body.data;
 			var decryptedData = decryptRequest(data, res);
+			var dData = decryptedData.data;
 			var pubkey = decryptedData.pubkey;
 
-			if (isValidPubkey(pubkey)) {
-				stmt = db.prepare('select rowid from Users where pubkey=(?)');
-				stmt.get(pubkey, function(err, row) {
-					if (err) {
-						console.log(err);
-					}
-					if (row == undefined) {
-						doesNotExist(pubkey);
-					} else {
-						result = {message: 'That key is already in use.', kid: row['rowid']}
-						toSend = encryptOutgoing(result, decryptedData.pubkey);
-						res.send(toSend);
-					}
-				});
-			} else {
-				result = {error: 'That key is invalid.'}
-				res.send(JSON.stringify(result));
+			function nonceUnused() {
+				if (isValidPubkey(pubkey)) {
+					stmt = db.prepare('select rowid from Users where pubkey=(?)');
+					stmt.get(pubkey, function(err, row) {
+						if (err) {
+							console.log(err);
+						}
+						if (row == undefined) {
+							doesNotExist(pubkey);
+						} else {
+							result = {message: 'That key is already in use.', kid: row['rowid']}
+							toSend = encryptOutgoing(result, decryptedData.pubkey);
+							res.send(toSend);
+						}
+					});
+				} else {
+					result = {error: 'That key is invalid.'}
+					res.send(JSON.stringify(result));
+				}
 			}
+			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
 
 		app.listen(1455);
