@@ -133,6 +133,7 @@ function main(BitmessageStatus) {
 
 			keyID = dData.kid;
 			label = dData.label;
+			keySeed = dData.seed;
 
 			function insertAddress(address, label, keyID) {
 				 stmt = db.prepare('insert into Addresses (address, label, userid) values (?, ?, ?)');
@@ -147,10 +148,11 @@ function main(BitmessageStatus) {
 			function nonceUnused() {
 				function keyIDValid(valid) {
 					if (valid) {
-						labelBase64 = toBase64(label);
-						rpcClient.methodCall('createRandomAddress', [labelBase64], function(err, val) {
+						seedBase64 = toBase64(keySeed);
+						rpcClient.methodCall('createDeterministicAddresses', [seedBase64], function(err, val) {
 							if (err == null) {
-								insertAddress(val, label, keyID);
+								var value = JSON.parse(val);
+								insertAddress(value.addresses[0], label, keyID);
 							}
 						});
 					} else {
