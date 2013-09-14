@@ -87,8 +87,21 @@ function keyIDCheck(keyID, key, callback) {
 			callback(false);
 		}
 	}
-	stmt = db.prepare('select pubkey from Users where rowid=(?)');
+	stmt = db.prepare('select pubkey from Users where rowid=(?) limit 1');
 	stmt.get(keyID, function(err, row) {
+		sqlDone(row);
+	});
+}
+function verifyAddressOwner(keyID, address, callback) {
+	function sqlDone(row) {
+		if (row['exists(select 1 from Addresses where userid=(?) and address=(?) limit 1)'] == 1) {
+			callback(true);
+		} else {
+			callback(false);
+		}
+	}
+	stmt = db.prepare('select exists(select 1 from Addresses where userid=(?) and address=(?) limit 1)');
+	stmt.get([keyID, address], function(err, row) {
 		sqlDone(row);
 	});
 }
@@ -122,7 +135,46 @@ function main(BitmessageStatus) {
 	if (BitmessageStatus == true) {
 		app.use(express.bodyParser());
 		app.post('/sendmessage', function(req, res) {
-			//todo: do this
+			console.log('sendmessage request');
+			setGlobalHeaders(res);
+			var data = req.body.data;
+			var decryptedData = decryptRequest(data, res);
+			var dData = decryptedData.data;
+
+			var subject = toBase64(dData.subject);
+			var toAddress = dData.toAddress;
+			var fromAddress = dData.fromAddress;
+			var message = toBase64(dData.message);
+			var keyID = dData.kid;
+
+			function addressOwned(owned) {
+				if (owned) {
+					rpcClient.methodCall('sendMessage', [toAddress, fromAddress, subject, message], function(err, val) {
+						if (err == null) {
+							res.send(val);
+						} else {
+							console.log(err);
+						}
+					});
+				} else {
+					result = {error: 'You don\'t have access to that address'};
+					res.send(JSON.stringify(result));
+				}
+			}
+			function nonceUnused() {
+				function keyIDValid(valid) {
+					if (valid) {
+						verifyAddressOwner(keyID, fromAddress, addressOwned);
+					} else {
+						result = {error: 'Your signing key didn\'t match the keyID'};
+						res.send(JSON.stringify(result));
+					}
+				}
+				keyIDCheck(keyID, decryptedData.pubkey, keyIDValid);
+			}
+
+			checkIfNonceUnused(dData.nonce, nonceUnused, res);
+
 		});
 		app.post('/newaddress', function(req, res) {
 			console.log('newaddress request');
@@ -131,9 +183,9 @@ function main(BitmessageStatus) {
 			var decryptedData = decryptRequest(data, res);
 			var dData = decryptedData.data;
 
-			keyID = dData.kid;
-			label = dData.label;
-			keySeed = dData.seed;
+			var keyID = dData.kid;
+			var label = dData.label;
+			var keySeed = dData.seed;
 
 			function insertAddress(address, label, keyID) {
 				 stmt = db.prepare('insert into Addresses (address, label, userid) values (?, ?, ?)');
@@ -160,7 +212,7 @@ function main(BitmessageStatus) {
 						res.send(JSON.stringify(result));
 					}
 				}
-				keyIDCheck(keyID, pubkey, keyIDValid);
+				keyIDCheck(keyID, decryptedData.pubkey, keyIDValid);
 			}
 			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
@@ -190,7 +242,7 @@ function main(BitmessageStatus) {
 						res.send(JSON.stringify(result));
 					}
 				}
-				keyIDCheck(keyID, pubkey, keyIDValid);
+				keyIDCheck(keyID, decryptedData.pubkey, keyIDValid);
 			}
 			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
@@ -242,7 +294,7 @@ function main(BitmessageStatus) {
 						res.send(JSON.stringify(result));
 					}
 				}
-				keyIDCheck(keyID, pubkey, keyIDValid);
+				keyIDCheck(keyID, decryptedData.pubkey, keyIDValid);
 			}
 			checkIfNonceUnused(dData.nonce, nonceUnused, res);
 		});
